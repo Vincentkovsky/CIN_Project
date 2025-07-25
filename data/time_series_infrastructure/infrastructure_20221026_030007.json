@@ -1,0 +1,1343 @@
+{
+  "infrastructure_hierarchy": {
+    "level_1_power_plants": [
+      {
+        "id": "pp_001",
+        "code": "WAGGA_THERMAL_01",
+        "name": "Wagga Wagga Thermal Power Plant",
+        "type": "thermal",
+        "capacity": "500MW",
+        "voltage_output": "330kV",
+        "status": "operational",
+        "operator": "EnergyAustralia",
+        "coordinates": [
+          147.25,
+          -35.08
+        ],
+        "connects_to": [
+          "sub_001",
+          "sub_002"
+        ],
+        "hierarchy_level": 1,
+        "fuel_type": "natural_gas",
+        "efficiency": 0.45,
+        "risk_level": 2
+      },
+      {
+        "id": "pp_002",
+        "code": "WAGGA_SOLAR_01",
+        "name": "Wagga Solar Farm",
+        "type": "solar",
+        "capacity": "200MW",
+        "voltage_output": "132kV",
+        "status": "operational",
+        "operator": "Origin Energy",
+        "coordinates": [
+          147.42,
+          -35.12
+        ],
+        "connects_to": [
+          "sub_003"
+        ],
+        "hierarchy_level": 1,
+        "fuel_type": "solar",
+        "efficiency": 0.22,
+        "risk_level": 1
+      }
+    ],
+    "level_2_substations": [
+      {
+        "id": "sub_001",
+        "code": "WAGGA_MAIN_SUB",
+        "name": "Wagga Wagga Main Substation",
+        "voltage_input": "330kV",
+        "voltage_output": "132kV",
+        "type": "transmission",
+        "status": "operational",
+        "coordinates": [
+          147.32,
+          -35.06
+        ],
+        "receives_from": [
+          "pp_001"
+        ],
+        "connects_to": [
+          "trans_001",
+          "trans_002"
+        ],
+        "hierarchy_level": 2,
+        "capacity": "800MVA",
+        "risk_level": 3
+      },
+      {
+        "id": "sub_002",
+        "code": "WAGGA_NORTH_SUB",
+        "name": "Wagga North Substation",
+        "voltage_input": "330kV",
+        "voltage_output": "132kV",
+        "type": "distribution",
+        "status": "operational",
+        "coordinates": [
+          147.36,
+          -35.04
+        ],
+        "receives_from": [
+          "pp_001"
+        ],
+        "connects_to": [
+          "trans_003",
+          "trans_004"
+        ],
+        "hierarchy_level": 2,
+        "capacity": "400MVA",
+        "risk_level": 2
+      },
+      {
+        "id": "sub_003",
+        "code": "WAGGA_SOUTH_SUB",
+        "name": "Wagga South Substation",
+        "voltage_input": "132kV",
+        "voltage_output": "132kV",
+        "type": "distribution",
+        "status": "operational",
+        "coordinates": [
+          147.38,
+          -35.1
+        ],
+        "receives_from": [
+          "pp_002"
+        ],
+        "connects_to": [
+          "trans_005",
+          "trans_006"
+        ],
+        "hierarchy_level": 2,
+        "capacity": "300MVA",
+        "risk_level": 2
+      }
+    ],
+    "level_3_transformers": [
+      {
+        "id": "trans_001",
+        "code": "TRANS_MAIN_01",
+        "type": "step_down",
+        "voltage_input": "132kV",
+        "voltage_output": "11kV",
+        "capacity": "250MVA",
+        "coordinates": [
+          147.318,
+          -35.058
+        ],
+        "receives_from": [
+          "sub_001"
+        ],
+        "connects_to": [
+          "tower_001",
+          "tower_002"
+        ],
+        "hierarchy_level": 3,
+        "status": "operational",
+        "risk_level": 2
+      },
+      {
+        "id": "trans_002",
+        "code": "TRANS_MAIN_02",
+        "type": "step_down",
+        "voltage_input": "132kV",
+        "voltage_output": "11kV",
+        "capacity": "250MVA",
+        "coordinates": [
+          147.322,
+          -35.062
+        ],
+        "receives_from": [
+          "sub_001"
+        ],
+        "connects_to": [
+          "tower_003",
+          "tower_004"
+        ],
+        "hierarchy_level": 3,
+        "status": "operational",
+        "risk_level": 2
+      },
+      {
+        "id": "trans_003",
+        "code": "TRANS_NORTH_01",
+        "type": "distribution",
+        "voltage_input": "132kV",
+        "voltage_output": "11kV",
+        "capacity": "50MVA",
+        "coordinates": [
+          147.358,
+          -35.038
+        ],
+        "receives_from": [
+          "sub_002"
+        ],
+        "connects_to": [
+          "tower_005",
+          "tower_006",
+          "tower_007"
+        ],
+        "hierarchy_level": 3,
+        "status": "operational",
+        "risk_level": 1
+      },
+      {
+        "id": "trans_004",
+        "code": "TRANS_NORTH_02",
+        "type": "distribution",
+        "voltage_input": "132kV",
+        "voltage_output": "11kV",
+        "capacity": "50MVA",
+        "coordinates": [
+          147.362,
+          -35.042
+        ],
+        "receives_from": [
+          "sub_002"
+        ],
+        "connects_to": [
+          "tower_008",
+          "tower_009",
+          "tower_010"
+        ],
+        "hierarchy_level": 3,
+        "status": "operational",
+        "risk_level": 1
+      },
+      {
+        "id": "trans_005",
+        "code": "TRANS_SOUTH_01",
+        "type": "distribution",
+        "voltage_input": "132kV",
+        "voltage_output": "11kV",
+        "capacity": "40MVA",
+        "coordinates": [
+          147.378,
+          -35.098
+        ],
+        "receives_from": [
+          "sub_003"
+        ],
+        "connects_to": [
+          "tower_011",
+          "tower_012",
+          "tower_013"
+        ],
+        "hierarchy_level": 3,
+        "status": "down",
+        "risk_level": 1
+      },
+      {
+        "id": "trans_006",
+        "code": "TRANS_SOUTH_02",
+        "type": "distribution",
+        "voltage_input": "132kV",
+        "voltage_output": "11kV",
+        "capacity": "40MVA",
+        "coordinates": [
+          147.382,
+          -35.102
+        ],
+        "receives_from": [
+          "sub_003"
+        ],
+        "connects_to": [
+          "tower_014",
+          "tower_015",
+          "tower_016"
+        ],
+        "hierarchy_level": 3,
+        "status": "operational",
+        "risk_level": 1
+      }
+    ],
+    "level_4_communication_towers": [
+      {
+        "id": "tower_001",
+        "code": "2650006",
+        "address": "150, Old Narrandera Rd WAGGA WAGGA NSW 2650",
+        "structures": "Lattice tower",
+        "networks": "Vodafone",
+        "power_consumption": "5kW",
+        "coordinates": [
+          147.19357,
+          -35.05119
+        ],
+        "receives_from": [
+          "trans_001"
+        ],
+        "hierarchy_level": 4,
+        "impact": "2h",
+        "backup": "5h",
+        "risk": 1
+      },
+      {
+        "id": "tower_002",
+        "code": "2650054",
+        "address": "103 Travers Street WAGGA WAGGA NSW 2650",
+        "structures": "30m Monopole",
+        "networks": "Optus",
+        "power_consumption": "3kW",
+        "coordinates": [
+          147.35629,
+          -35.09802
+        ],
+        "receives_from": [
+          "trans_001"
+        ],
+        "hierarchy_level": 4,
+        "impact": "4h",
+        "backup": "2h",
+        "risk": 3,
+        "status": "operational"
+      },
+      {
+        "id": "tower_003",
+        "code": "2650018",
+        "address": "off Byrnes Rd WAGGA WAGGA NSW 2650",
+        "structures": "Lattice tower",
+        "networks": "Telstra",
+        "power_consumption": "4kW",
+        "coordinates": [
+          147.42206,
+          -35.07763
+        ],
+        "receives_from": [
+          "trans_002"
+        ],
+        "hierarchy_level": 4,
+        "impact": "3h",
+        "backup": "3h",
+        "risk": 1
+      },
+      {
+        "id": "tower_004",
+        "code": "2650044",
+        "address": "14 Blaxland Road EAST WAGGA WAGGA NSW 2650",
+        "structures": "30m Concrete Pole",
+        "networks": "Telstra",
+        "power_consumption": "6kW",
+        "coordinates": [
+          147.4065,
+          -35.12878
+        ],
+        "receives_from": [
+          "trans_002"
+        ],
+        "hierarchy_level": 4,
+        "impact": "4h",
+        "backup": "6h",
+        "risk": 2,
+        "status": "operational"
+      },
+      {
+        "id": "tower_005",
+        "code": "2650023",
+        "address": "367 Edward Street WAGGA WAGGA NSW 2650",
+        "structures": "30m Concrete Monopole",
+        "networks": "Optus",
+        "power_consumption": "4kW",
+        "coordinates": [
+          147.34936,
+          -35.11485
+        ],
+        "receives_from": [
+          "trans_003"
+        ],
+        "hierarchy_level": 4,
+        "impact": "3h",
+        "backup": "12h",
+        "risk": 3
+      },
+      {
+        "id": "tower_006",
+        "code": "2650039",
+        "address": "260-280 Edward St WAGGA WAGGA NSW 2650",
+        "structures": "Building Internal - Telstra DAS",
+        "networks": "Optus",
+        "power_consumption": "2kW",
+        "coordinates": [
+          147.3571,
+          -35.11863
+        ],
+        "receives_from": [
+          "trans_003"
+        ],
+        "hierarchy_level": 4,
+        "impact": "1h",
+        "backup": "24h",
+        "risk": 1,
+        "status": "operational"
+      },
+      {
+        "id": "tower_007",
+        "code": "2650049",
+        "address": "260 Edward Street WAGGA WAGGA NSW 2650",
+        "structures": "Building IBC DAS Telstra Lead",
+        "networks": "Telstra",
+        "power_consumption": "3kW",
+        "coordinates": [
+          147.35711,
+          -35.11792
+        ],
+        "receives_from": [
+          "trans_003"
+        ],
+        "hierarchy_level": 4,
+        "impact": "1h",
+        "backup": "1h",
+        "risk": 2,
+        "status": "warning"
+      },
+      {
+        "id": "tower_008",
+        "code": "2650004",
+        "address": "76 Morgan Street WAGGA WAGGA NSW 2650",
+        "structures": "Building External Rooftop",
+        "networks": "Optus",
+        "power_consumption": "4kW",
+        "coordinates": [
+          147.36972,
+          -35.11639
+        ],
+        "receives_from": [
+          "trans_004"
+        ],
+        "hierarchy_level": 4,
+        "impact": "12h",
+        "backup": "12h",
+        "risk": 2,
+        "status": "operational"
+      },
+      {
+        "id": "tower_009",
+        "code": "2650036",
+        "address": "135 Baylis Street WAGGA WAGGA NSW 2650",
+        "structures": "LGR U21 Optus",
+        "networks": "Optus",
+        "power_consumption": "5kW",
+        "coordinates": [
+          147.37133,
+          -35.11308
+        ],
+        "receives_from": [
+          "trans_004"
+        ],
+        "hierarchy_level": 4,
+        "impact": "13h",
+        "backup": "12h",
+        "risk": 3,
+        "status": "down"
+      },
+      {
+        "id": "tower_010",
+        "code": "2650014",
+        "address": "63 - 65 Johnston Street WAGGA WAGGA NSW 2650",
+        "structures": "Building External Rooftop",
+        "networks": "Optus",
+        "power_consumption": "3kW",
+        "coordinates": [
+          147.3685,
+          -35.10736
+        ],
+        "receives_from": [
+          "trans_004"
+        ],
+        "hierarchy_level": 4,
+        "impact": "6h",
+        "backup": "8h",
+        "risk": 2,
+        "status": "warning"
+      },
+      {
+        "id": "tower_011",
+        "code": "2650012",
+        "address": "226 Tarcutta St WAGGA WAGGA NSW 2650",
+        "structures": "Building External Rooftop",
+        "networks": "Telstra",
+        "power_consumption": "4kW",
+        "coordinates": [
+          147.37102,
+          -35.10635
+        ],
+        "receives_from": [
+          "trans_005"
+        ],
+        "hierarchy_level": 4,
+        "impact": "13h",
+        "backup": "3h",
+        "risk": 3,
+        "status": "operational"
+      },
+      {
+        "id": "tower_012",
+        "code": "2650021",
+        "address": "57 Plumpton Road LAKE ALBERT NSW 2650",
+        "structures": "30m Concrete Pole",
+        "networks": "Optus",
+        "power_consumption": "5kW",
+        "coordinates": [
+          147.364,
+          -35.16911
+        ],
+        "receives_from": [
+          "trans_005"
+        ],
+        "hierarchy_level": 4,
+        "impact": "2h",
+        "backup": "5h",
+        "risk": 2,
+        "status": "operational"
+      },
+      {
+        "id": "tower_013",
+        "code": "2650053",
+        "address": "13 Sycamore Road LAKE ALBERT NSW 2650",
+        "structures": "Building External Rooftop",
+        "networks": "Optus",
+        "power_consumption": "2kW",
+        "coordinates": [
+          147.39227,
+          -35.15706
+        ],
+        "receives_from": [
+          "trans_005"
+        ],
+        "hierarchy_level": 4,
+        "impact": "1h",
+        "backup": "1h",
+        "risk": 3,
+        "status": "down"
+      },
+      {
+        "id": "tower_014",
+        "code": "2650011",
+        "address": "LOT 16 Plan DP203067 VINCENT RD LAKE ALBERT NSW 2650",
+        "structures": "Building External Rooftop",
+        "networks": "Telstra",
+        "power_consumption": "3kW",
+        "coordinates": [
+          147.39046,
+          -35.15411
+        ],
+        "receives_from": [
+          "trans_006"
+        ],
+        "hierarchy_level": 4,
+        "impact": "12h",
+        "backup": "12h",
+        "risk": 3
+      },
+      {
+        "id": "tower_015",
+        "code": "2650058",
+        "address": "103A Red Hill Road TOLLAND NSW 2650",
+        "structures": "Building External Rooftop",
+        "networks": "Optus",
+        "power_consumption": "4kW",
+        "coordinates": [
+          147.35864,
+          -35.15073
+        ],
+        "receives_from": [
+          "trans_006"
+        ],
+        "hierarchy_level": 4,
+        "impact": "2h",
+        "backup": "13h",
+        "risk": 2
+      },
+      {
+        "id": "tower_016",
+        "code": "2650027",
+        "address": "56 ROSS SMITH RD LLOYD NSW 2650",
+        "structures": "Building External Rooftop",
+        "networks": "Telstra",
+        "power_consumption": "3kW",
+        "coordinates": [
+          147.33212,
+          -35.15755
+        ],
+        "receives_from": [
+          "trans_006"
+        ],
+        "hierarchy_level": 4,
+        "impact": "1h",
+        "backup": "5h",
+        "risk": 2
+      }
+    ]
+  },
+  "hierarchical_power_cables": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_pp001_sub001",
+          "from": "pp_001",
+          "to": "sub_001",
+          "from_level": 1,
+          "to_level": 2,
+          "voltage": "330kV",
+          "cable_type": "transmission",
+          "status": "operational",
+          "color": "rgb(255, 0, 0)",
+          "capacity": "500MW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.25,
+              -35.08
+            ],
+            [
+              147.32,
+              -35.06
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_pp001_sub002",
+          "from": "pp_001",
+          "to": "sub_002",
+          "from_level": 1,
+          "to_level": 2,
+          "voltage": "330kV",
+          "cable_type": "transmission",
+          "status": "operational",
+          "color": "rgb(255, 0, 0)",
+          "capacity": "500MW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.25,
+              -35.08
+            ],
+            [
+              147.36,
+              -35.04
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_pp002_sub003",
+          "from": "pp_002",
+          "to": "sub_003",
+          "from_level": 1,
+          "to_level": 2,
+          "voltage": "132kV",
+          "cable_type": "transmission",
+          "status": "operational",
+          "color": "rgb(255, 165, 0)",
+          "capacity": "200MW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.42,
+              -35.12
+            ],
+            [
+              147.38,
+              -35.1
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_sub001_trans001",
+          "from": "sub_001",
+          "to": "trans_001",
+          "from_level": 2,
+          "to_level": 3,
+          "voltage": "132kV",
+          "cable_type": "distribution",
+          "status": "operational",
+          "color": "rgb(255, 165, 0)",
+          "capacity": "250MVA"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.32,
+              -35.06
+            ],
+            [
+              147.318,
+              -35.058
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_sub001_trans002",
+          "from": "sub_001",
+          "to": "trans_002",
+          "from_level": 2,
+          "to_level": 3,
+          "voltage": "132kV",
+          "cable_type": "distribution",
+          "status": "operational",
+          "color": "rgb(255, 165, 0)",
+          "capacity": "250MVA"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.32,
+              -35.06
+            ],
+            [
+              147.322,
+              -35.062
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_sub002_trans003",
+          "from": "sub_002",
+          "to": "trans_003",
+          "from_level": 2,
+          "to_level": 3,
+          "voltage": "132kV",
+          "cable_type": "distribution",
+          "status": "operational",
+          "color": "rgb(255, 165, 0)",
+          "capacity": "50MVA"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.36,
+              -35.04
+            ],
+            [
+              147.358,
+              -35.038
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_sub002_trans004",
+          "from": "sub_002",
+          "to": "trans_004",
+          "from_level": 2,
+          "to_level": 3,
+          "voltage": "132kV",
+          "cable_type": "distribution",
+          "status": "operational",
+          "color": "rgb(255, 165, 0)",
+          "capacity": "50MVA"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.36,
+              -35.04
+            ],
+            [
+              147.362,
+              -35.042
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_sub003_trans005",
+          "from": "sub_003",
+          "to": "trans_005",
+          "from_level": 2,
+          "to_level": 3,
+          "voltage": "132kV",
+          "cable_type": "distribution",
+          "status": "down",
+          "color": "rgb(255, 165, 0)",
+          "capacity": "40MVA"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.38,
+              -35.1
+            ],
+            [
+              147.378,
+              -35.098
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_sub003_trans006",
+          "from": "sub_003",
+          "to": "trans_006",
+          "from_level": 2,
+          "to_level": 3,
+          "voltage": "132kV",
+          "cable_type": "distribution",
+          "status": "operational",
+          "color": "rgb(255, 165, 0)",
+          "capacity": "40MVA"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.38,
+              -35.1
+            ],
+            [
+              147.382,
+              -35.102
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans001_tower001",
+          "from": "trans_001",
+          "to": "tower_001",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "5kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.318,
+              -35.058
+            ],
+            [
+              147.19357,
+              -35.05119
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans001_tower002",
+          "from": "trans_001",
+          "to": "tower_002",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "warning",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "3kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.318,
+              -35.058
+            ],
+            [
+              147.35629,
+              -35.09802
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans002_tower003",
+          "from": "trans_002",
+          "to": "tower_003",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "4kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.322,
+              -35.062
+            ],
+            [
+              147.42206,
+              -35.07763
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans002_tower004",
+          "from": "trans_002",
+          "to": "tower_004",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "6kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.322,
+              -35.062
+            ],
+            [
+              147.4065,
+              -35.12878
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans003_tower005",
+          "from": "trans_003",
+          "to": "tower_005",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "4kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.358,
+              -35.038
+            ],
+            [
+              147.34936,
+              -35.11485
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans003_tower006",
+          "from": "trans_003",
+          "to": "tower_006",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "warning",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "2kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.358,
+              -35.038
+            ],
+            [
+              147.3571,
+              -35.11863
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans003_tower007",
+          "from": "trans_003",
+          "to": "tower_007",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "warning",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "3kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.358,
+              -35.038
+            ],
+            [
+              147.35711,
+              -35.11792
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans004_tower008",
+          "from": "trans_004",
+          "to": "tower_008",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "warning",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "4kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.362,
+              -35.042
+            ],
+            [
+              147.36972,
+              -35.11639
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans004_tower009",
+          "from": "trans_004",
+          "to": "tower_009",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "5kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.362,
+              -35.042
+            ],
+            [
+              147.37133,
+              -35.11308
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans004_tower010",
+          "from": "trans_004",
+          "to": "tower_010",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "down",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "3kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.362,
+              -35.042
+            ],
+            [
+              147.3685,
+              -35.10736
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans005_tower011",
+          "from": "trans_005",
+          "to": "tower_011",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "4kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.378,
+              -35.098
+            ],
+            [
+              147.37102,
+              -35.10635
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans005_tower012",
+          "from": "trans_005",
+          "to": "tower_012",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "5kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.378,
+              -35.098
+            ],
+            [
+              147.364,
+              -35.16911
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans005_tower013",
+          "from": "trans_005",
+          "to": "tower_013",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "2kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.378,
+              -35.098
+            ],
+            [
+              147.39227,
+              -35.15706
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans006_tower014",
+          "from": "trans_006",
+          "to": "tower_014",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "3kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.382,
+              -35.102
+            ],
+            [
+              147.39046,
+              -35.15411
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans006_tower015",
+          "from": "trans_006",
+          "to": "tower_015",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "operational",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "4kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.382,
+              -35.102
+            ],
+            [
+              147.35864,
+              -35.15073
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "cable_id": "cable_trans006_tower016",
+          "from": "trans_006",
+          "to": "tower_016",
+          "from_level": 3,
+          "to_level": 4,
+          "voltage": "11kV",
+          "cable_type": "service",
+          "status": "warning",
+          "color": "rgb(0, 255, 0)",
+          "capacity": "3kW"
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              147.382,
+              -35.102
+            ],
+            [
+              147.33212,
+              -35.15755
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "hierarchy_visualization": {
+    "level_colors": {
+      "level_1": {
+        "color": "rgb(255, 0, 0)",
+        "description": "Power Plants - High Voltage Generation",
+        "size": 30
+      },
+      "level_2": {
+        "color": "rgb(255, 165, 0)",
+        "description": "Substations - Voltage Transformation",
+        "size": 25
+      },
+      "level_3": {
+        "color": "rgb(255, 255, 0)",
+        "description": "Transformers - Local Distribution",
+        "size": 20
+      },
+      "level_4": {
+        "color": "rgb(0, 255, 0)",
+        "description": "Communication Towers - End Users",
+        "size": 15
+      }
+    },
+    "cable_colors": {
+      "transmission": {
+        "color": "rgb(255, 0, 0)",
+        "width": 8,
+        "description": "High Voltage Transmission (330kV)"
+      },
+      "distribution": {
+        "color": "rgb(255, 165, 0)",
+        "width": 6,
+        "description": "Medium Voltage Distribution (132kV)"
+      },
+      "service": {
+        "color": "rgb(0, 255, 0)",
+        "width": 4,
+        "description": "Low Voltage Service (11kV)"
+      }
+    }
+  },
+  "power_flow_simulation": {
+    "flow_direction": "top_down",
+    "flow_speed": 0.5,
+    "particle_count": 3,
+    "flow_animation": {
+      "enabled": true,
+      "pulse_frequency": 1.0,
+      "glow_intensity": 0.8
+    }
+  },
+  "metadata": {
+    "version": "2.0",
+    "created_date": "2024-01-15",
+    "hierarchy_type": "power_transmission",
+    "area": "Wagga Wagga, NSW",
+    "total_infrastructure": {
+      "power_plants": 2,
+      "substations": 3,
+      "transformers": 6,
+      "communication_towers": 16,
+      "power_cables": 24
+    }
+  }
+}

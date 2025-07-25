@@ -1,0 +1,29 @@
+{
+  "name": "deckgl-example-react-map-gl-mapbox",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "start": "vite --open",
+    "start-local": "vite --config ../../../vite.config.local.mjs",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@deck.gl/geo-layers": "^9.0.0",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@fontsource/roboto": "^5.0.14",
+    "@loaders.gl/core": "^4.2.2",
+    "@loaders.gl/obj": "^4.2.2",
+    "@mui/icons-material": "^6.0.0",
+    "@mui/material": "^6.0.0",
+    "deck.gl": "^9.0.0",
+    "mapbox-gl": "^3.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-map-gl": "^7.1.0"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0"
+  }
+}
