@@ -1,0 +1,61 @@
+{
+    "infra_status": {
+        "tower_003": [
+            {
+                "time_start": "20221024_1020",
+                "time_end": "20221024_1815",
+                "risk_level": 2
+            },
+            {
+                "time_start": "20221024_1820",
+                "time_end": "20221024_2345",
+                "risk_level": 3
+            }
+        ],
+        "tower_002": [
+            {
+                "time_start": "20221024_0900",
+                "time_end": "20221024_2400",
+                "risk_level": 2
+            }
+        ],
+        "sub_001": [
+            {
+                "time_start": "20221024_1620",
+                "time_end": "20221024_2400",
+                "risk_level": 2
+            }
+        ],
+        "trans_007": [
+            {
+                "time_start": "20221024_0400",
+                "time_end": "20221024_1600",
+                "risk_level": 2
+            },
+            {
+                "time_start": "20221024_1600",
+                "time_end": "20221024_2345",
+                "risk_level": 3
+            }
+        ],
+        "tower_004": [
+            {
+                "time_start": "20221024_1600",
+                "time_end": "20221024_2400",
+                "risk_level": 2
+            }
+        ],
+        "tower_006": [
+            {
+                "time_start": "20221024_1600",
+                "time_end": "20221024_1900",
+                "risk_level": 2
+            },
+            {
+                "time_start": "20221024_1900",
+                "time_end": "20221024_2400",
+                "risk_level": 3
+            }
+        ]
+    }
+}
