@@ -30,3 +30,4 @@ yarn-error.log*
 Thumb.db
 
 data/flood_tiles
+data/time_series_infrastructure

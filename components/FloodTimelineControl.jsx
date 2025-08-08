@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -7,6 +7,8 @@ const FloodTimelineControl = ({ onTimestepChange, isVisible, availableTimesteps 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimestep, setCurrentTimestep] = useState(0);
   const [playInterval, setPlayInterval] = useState(null);
+  const [dynamicWidth, setDynamicWidth] = useState('calc(100vw - 400px)');
+  const containerRef = useRef(null);
 
   // 使用提供的时间戳或生成默认时间戳
   const timesteps = availableTimesteps.length > 0 
@@ -62,6 +64,38 @@ const FloodTimelineControl = ({ onTimestepChange, isVisible, availableTimesteps 
     }
   }, [isPlaying, playInterval]);
 
+  // 计算动态宽度
+  useEffect(() => {
+    const calculateWidth = () => {
+      if (!containerRef.current) return;
+      
+      // 计算内容实际需要的宽度
+      const buttonWidth = 48; // IconButton 大约宽度
+      const timeDisplayWidth = 80; // Typography minWidth
+      const gap = 16; // mr: 2 * 8px
+      const timelineDotsWidth = timesteps.length * 12 + (timesteps.length - 1) * 8; // 12px dot + 8px gap
+      const padding = 32; // padding: 2 * 16px
+      
+      const contentWidth = buttonWidth + gap + timeDisplayWidth + gap + timelineDotsWidth + padding;
+      const maxWidth = window.innerWidth - 400; // 窗口宽度 - 400px
+      
+      // 如果内容宽度小于最大宽度，使用内容宽度；否则使用最大宽度
+      if (contentWidth < maxWidth && contentWidth >= 400) {
+        setDynamicWidth(`${contentWidth}px`);
+      } else {
+        setDynamicWidth('calc(100vw - 400px)');
+      }
+    };
+
+    calculateWidth();
+    
+    // 监听窗口大小变化
+    const handleResize = () => calculateWidth();
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, [timesteps.length]);
+
   // 当availableTimesteps改变时，重置当前时间步
   useEffect(() => {
     if (availableTimesteps.length > 0) {
@@ -88,22 +122,24 @@ const FloodTimelineControl = ({ onTimestepChange, isVisible, availableTimesteps 
   if (!isVisible) return null;
 
   return (
-    <Box sx={{
-      position: 'fixed',
-      bottom: 20,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      display: 'flex',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      padding: 2,
-      borderRadius: 2,
-      boxShadow: 3,
-      zIndex: 10,
-      minWidth: 400,
-      maxWidth: '80vw',
-      overflowX: 'auto'
-    }}>
+    <Box 
+      ref={containerRef}
+      sx={{
+        position: 'fixed',
+        bottom: 20,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        padding: 2,
+        borderRadius: 2,
+        boxShadow: 3,
+        zIndex: 10,
+        width: dynamicWidth,
+        minWidth: 400,
+        overflowX: 'auto'
+      }}>
       {/* Play/Pause Button */}
       <IconButton 
         onClick={handlePlay}
