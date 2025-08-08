@@ -18,8 +18,8 @@ registerLoaders([OBJLoader, GLTFLoader]);
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const PREC = 'data/precipitation.json';
-const HIERARCHICAL_INFRASTRUCTURE = 'data/hierarchical_infrastructure.json';
-const TIME_SERIES_INFRASTRUCTURE_BASE = 'data/time_series_infrastructure/infrastructure_';
+const INFRA_META = 'data/infra_meta.json';
+const INFRA_STATUS = 'data/infra_status.json';
 const FLOOD_TILES_BASE = 'data/flood_tiles';
 
 // Model paths
@@ -59,8 +59,7 @@ const getStatusColorString = (status) => {
 };
 
 // 从环境变量中读取Mapbox token
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 
-  'pk.eyJ1IjoiamFsZW5rYW5nIiwiYSI6ImNseWNxY2ttcTFxaHIycm9sMDRteDFrbDAifQ.vqfdfdxjCOE9vZgxxGORnw'; // 回退值
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN 
 
 const INITIAL_VIEW_STATE = {
   latitude: -35.1276,
@@ -86,18 +85,226 @@ function Root() {
   const [zoom, setZoom] = useState(INITIAL_VIEW_STATE.zoom);
   const [currentTimestep, setCurrentTimestep] = useState(null);
   const [precipitationData, setPrecipitationData] = useState(null);
+  const [infrastructureMetaData, setInfrastructureMetaData] = useState(null);
+  const [infrastructureStatusData, setInfrastructureStatusData] = useState(null);
   const [infrastructureData, setInfrastructureData] = useState(null);
   const [animationFrame, setAnimationFrame] = useState(0);
   const [powerParticles, setPowerParticles] = useState([]);
   const [floodTimestamps, setFloodTimestamps] = useState([]);
   const [layerVisibility, setLayerVisibility] = useState({
     prec: false,
-    rfcst: false,
     tower: false,
     flood: true,
     power: true,
     infrastructure: true
   });
+
+  // 函数：根据当前时间点计算设备状态
+  const calculateInfrastructureStatusAtTime = useCallback((currentTime, statusData) => {
+    if (!currentTime || !statusData || !statusData.infra_status) {
+      return {};
+    }
+
+    // 将时间戳格式转换为可比较的格式 (YYYYMMDD_HHMMSS)
+    let timeStr = currentTime.time;
+    if (timeStr.startsWith('waterdepth_')) {
+      timeStr = timeStr.substring('waterdepth_'.length);
+    }
+
+    const statusMap = {};
+    
+    // 遍历所有设备的状态数据
+    Object.entries(statusData.infra_status).forEach(([deviceId, statusPeriods]) => {
+      // 检查当前时间是否在任何异常时间段内
+      const activeStatus = statusPeriods.find(period => {
+        const startTime = period.time_start;
+        const endTime = period.time_end;
+        
+        // 比较时间字符串（格式：YYYYMMDD_HHMMSS）
+        return timeStr >= startTime && timeStr <= endTime;
+      });
+
+      if (activeStatus) {
+        statusMap[deviceId] = {
+          status: getRiskLevelStatus(activeStatus.risk_level),
+          risk_level: activeStatus.risk_level,
+          info: activeStatus.info || ''
+        };
+      } else {
+        // 如果没有异常状态，则为正常状态
+        statusMap[deviceId] = {
+          status: 'operational',
+          risk_level: 1,
+          info: ''
+        };
+      }
+    });
+
+    return statusMap;
+  }, []);
+
+  // 函数：将risk_level转换为status字符串
+  const getRiskLevelStatus = (riskLevel) => {
+    switch (riskLevel) {
+      case 1:
+        return 'operational';
+      case 2:
+        return 'warning';
+      case 3:
+      case 4:
+      case 5:
+        return 'down';
+      default:
+        return 'operational';
+    }
+  };
+
+  // 函数：根据设备ID查找坐标
+  const getDeviceCoordinates = useCallback((deviceId, infrastructureData) => {
+    if (!infrastructureData || !deviceId) return null;
+
+    const hierarchy = infrastructureData.infrastructure_hierarchy;
+    
+    // 查找各级设备
+    const allDevices = [
+      ...(hierarchy.level_1_power_plants || []),
+      ...(hierarchy.level_2_substations || []),
+      ...(hierarchy.level_3_transformers || []),
+      ...(hierarchy.level_4_communication_towers || [])
+    ];
+
+    const device = allDevices.find(d => d.id === deviceId);
+    return device ? device.coordinates : null;
+  }, []);
+
+  // 函数：将简化的电缆数据转换为带坐标的GeoJSON格式
+  const convertCablesToGeoJSON = useCallback((cables, infrastructureData) => {
+    if (!cables || !infrastructureData) return { type: "FeatureCollection", features: [] };
+
+    const features = cables.map(cable => {
+      const fromCoords = getDeviceCoordinates(cable.from, infrastructureData);
+      const toCoords = getDeviceCoordinates(cable.to, infrastructureData);
+
+      if (!fromCoords || !toCoords) {
+        console.warn(`Missing coordinates for cable ${cable.cable_id}: ${cable.from} -> ${cable.to}`);
+        return null;
+      }
+
+      return {
+        type: "Feature",
+        properties: {
+          cable_id: cable.cable_id,
+          from: cable.from,
+          to: cable.to,
+          from_level: cable.from_level,
+          to_level: cable.to_level,
+          voltage: cable.voltage,
+          cable_type: cable.cable_type,
+          status: cable.status,
+          color: cable.color,
+          capacity: cable.capacity
+        },
+        geometry: {
+          type: "LineString",
+          coordinates: [fromCoords, toCoords]
+        }
+      };
+    }).filter(Boolean);
+
+    return {
+      type: "FeatureCollection",
+      features: features
+    };
+  }, [getDeviceCoordinates]);
+
+  // 函数：合并基础设施数据和状态数据
+  const mergeInfrastructureData = useCallback((metaData, currentTime, statusData) => {
+    if (!metaData) return null;
+
+    // 获取当前时间点的状态映射
+    const statusMap = calculateInfrastructureStatusAtTime(currentTime, statusData);
+    
+    // 深度克隆元数据
+    const mergedData = JSON.parse(JSON.stringify(metaData));
+
+    // 更新各层级设备的状态
+    // Level 1: Power Plants
+    mergedData.infrastructure_hierarchy.level_1_power_plants.forEach(plant => {
+      if (statusMap[plant.id]) {
+        plant.status = statusMap[plant.id].status;
+        plant.risk_level = statusMap[plant.id].risk_level;
+        if (statusMap[plant.id].info) {
+          plant.info = statusMap[plant.id].info;
+        }
+      } else {
+        plant.status = 'operational';
+        plant.risk_level = 1;
+      }
+    });
+
+    // Level 2: Substations
+    mergedData.infrastructure_hierarchy.level_2_substations.forEach(substation => {
+      if (statusMap[substation.id]) {
+        substation.status = statusMap[substation.id].status;
+        substation.risk_level = statusMap[substation.id].risk_level;
+        if (statusMap[substation.id].info) {
+          substation.info = statusMap[substation.id].info;
+        }
+      } else {
+        substation.status = 'operational';
+        substation.risk_level = 1;
+      }
+    });
+
+    // Level 3: Transformers
+    mergedData.infrastructure_hierarchy.level_3_transformers.forEach(transformer => {
+      if (statusMap[transformer.id]) {
+        transformer.status = statusMap[transformer.id].status;
+        transformer.risk_level = statusMap[transformer.id].risk_level;
+        if (statusMap[transformer.id].info) {
+          transformer.info = statusMap[transformer.id].info;
+        }
+      } else {
+        transformer.status = 'operational';
+        transformer.risk_level = 1;
+      }
+    });
+
+    // Level 4: Communication Towers
+    mergedData.infrastructure_hierarchy.level_4_communication_towers.forEach(tower => {
+      if (statusMap[tower.id]) {
+        tower.status = statusMap[tower.id].status;
+        tower.risk = statusMap[tower.id].risk_level;
+        if (statusMap[tower.id].info) {
+          tower.info = statusMap[tower.id].info;
+        }
+      } else {
+        tower.status = 'operational';
+        tower.risk = 1;
+      }
+    });
+
+    // 更新电缆状态 - 基于两端设备的状态
+    mergedData.hierarchical_power_cables.forEach(cable => {
+      const fromId = cable.from;
+      const toId = cable.to;
+      
+      // 检查两端设备的状态
+      const fromStatus = statusMap[fromId];
+      const toStatus = statusMap[toId];
+      
+      // 如果任一端设备有问题，电缆也有问题
+      if (fromStatus && fromStatus.status === 'down' || toStatus && toStatus.status === 'down') {
+        cable.status = 'down';
+      } else if (fromStatus && fromStatus.status === 'warning' || toStatus && toStatus.status === 'warning') {
+        cable.status = 'warning';
+      } else {
+        cable.status = 'operational';
+      }
+    });
+
+    return mergedData;
+  }, [calculateInfrastructureStatusAtTime]);
 
   // 加载洪水瓦片文件夹列表
   useEffect(() => {
@@ -171,83 +378,65 @@ function Root() {
     loadPrecipitationData();
   }, []);
 
-  // Load hierarchical infrastructure data
+  // Load infrastructure meta data (static data, load once)
   useEffect(() => {
-    const loadHierarchicalInfrastructureData = async () => {
+    const loadInfrastructureMetaData = async () => {
       try {
-        // 如果没有当前时间点，加载基本数据
-        if (!currentTimestep) {
-        const response = await fetch(HIERARCHICAL_INFRASTRUCTURE);
+        const response = await fetch(INFRA_META);
         const data = await response.json();
-        setInfrastructureData(data);
-        console.log("Loaded base infrastructure data");
-        } else {
-          // 如果有当前时间点，加载对应的时序数据
-          const timeStr = currentTimestep.time;
-          console.log(`Loading infrastructure data for time: ${timeStr}`);
-          
-          // 处理时间戳格式，从waterdepth_YYYYMMDD_HHMMSS提取YYYYMMDD_HHMMSS
-          let infrastructureTimeStr = timeStr;
-          if (timeStr.startsWith('waterdepth_')) {
-            infrastructureTimeStr = timeStr.substring('waterdepth_'.length);
-          }
-          
-          const response = await fetch(`${TIME_SERIES_INFRASTRUCTURE_BASE}${infrastructureTimeStr}.json`);
-          
-          // 如果时序数据不存在，则回退到基本数据
-          if (!response.ok) {
-            console.warn(`Time series infrastructure data for ${infrastructureTimeStr} not found, using base data`);
-            const baseResponse = await fetch(HIERARCHICAL_INFRASTRUCTURE);
-            const baseData = await baseResponse.json();
-            setInfrastructureData(baseData);
-          } else {
-            const data = await response.json();
-            // 打印一些状态信息
-            const statusCounts = {
-              operational: 0,
-              warning: 0,
-              down: 0
-            };
-            
-            // 检查发电厂状态
-            data.infrastructure_hierarchy.level_1_power_plants.forEach(plant => {
-              statusCounts[plant.status] = (statusCounts[plant.status] || 0) + 1;
-            });
-            
-            // 检查变电站状态
-            data.infrastructure_hierarchy.level_2_substations.forEach(substation => {
-              statusCounts[substation.status] = (statusCounts[substation.status] || 0) + 1;
-            });
-            
-            // 检查变压器状态
-            data.infrastructure_hierarchy.level_3_transformers.forEach(transformer => {
-              statusCounts[transformer.status] = (statusCounts[transformer.status] || 0) + 1;
-            });
-            
-            // 检查电缆状态
-            data.hierarchical_power_cables.features.forEach(cable => {
-              statusCounts[cable.properties.status] = (statusCounts[cable.properties.status] || 0) + 1;
-            });
-            
-            console.log(`Loaded infrastructure data for time: ${infrastructureTimeStr}`, statusCounts);
-            setInfrastructureData(data);
-          }
-        }
+        setInfrastructureMetaData(data);
+        console.log("Loaded infrastructure meta data");
       } catch (error) {
-        console.error('Error loading hierarchical infrastructure data:', error);
-        // 出错时尝试加载基本数据
-        try {
-          const response = await fetch(HIERARCHICAL_INFRASTRUCTURE);
-          const data = await response.json();
-          setInfrastructureData(data);
-        } catch (fallbackError) {
-          console.error('Failed to load fallback data:', fallbackError);
-        }
+        console.error('Error loading infrastructure meta data:', error);
       }
     };
 
-    loadHierarchicalInfrastructureData();
-  }, [currentTimestep]);
+    loadInfrastructureMetaData();
+  }, []);
+
+  // Load infrastructure status data (load once)
+  useEffect(() => {
+    const loadInfrastructureStatusData = async () => {
+      try {
+        const response = await fetch(INFRA_STATUS);
+        const data = await response.json();
+        setInfrastructureStatusData(data);
+        console.log("Loaded infrastructure status data");
+      } catch (error) {
+        console.error('Error loading infrastructure status data:', error);
+      }
+    };
+
+    loadInfrastructureStatusData();
+  }, []);
+
+  // Merge infrastructure meta data with status data when timestep changes
+  useEffect(() => {
+    if (infrastructureMetaData) {
+      const mergedData = mergeInfrastructureData(
+        infrastructureMetaData, 
+        currentTimestep, 
+        infrastructureStatusData
+      );
+      setInfrastructureData(mergedData);
+      
+      if (currentTimestep && infrastructureStatusData) {
+        // 计算当前时间点的状态统计
+        const statusMap = calculateInfrastructureStatusAtTime(currentTimestep, infrastructureStatusData);
+        const statusCounts = {
+          operational: 0,
+          warning: 0,
+          down: 0
+        };
+        
+        Object.values(statusMap).forEach(status => {
+          statusCounts[status.status] = (statusCounts[status.status] || 0) + 1;
+        });
+        
+        console.log(`Infrastructure status for time ${currentTimestep.time}:`, statusCounts);
+      }
+    }
+  }, [infrastructureMetaData, infrastructureStatusData, currentTimestep, mergeInfrastructureData, calculateInfrastructureStatusAtTime]);
 
   // Animation loop for power flow effect
   useEffect(() => {
@@ -260,18 +449,24 @@ function Root() {
   }, []);
 
   // Generate particles along power lines
-  const generateParticles = useCallback((powerLines) => {
-    if (!powerLines || !powerLines.features) return [];
+  const generateParticles = useCallback((powerLines, infrastructureData) => {
+    if (!powerLines || !infrastructureData) return [];
 
     const particles = [];
     
-    powerLines.features.forEach((line, lineIndex) => {
+    powerLines.forEach((cable, cableIndex) => {
       // 检查电缆状态，如果是down则不生成粒子
-      const status = line.properties.status;
+      const status = cable.status;
       if (status === 'down') return;
       
+      // 获取起点和终点坐标
+      const fromCoords = getDeviceCoordinates(cable.from, infrastructureData);
+      const toCoords = getDeviceCoordinates(cable.to, infrastructureData);
+      
+      if (!fromCoords || !toCoords) return;
+      
       // 创建弧形路径
-      const arcPath = createArcPath(line.geometry.coordinates);
+      const arcPath = createArcPath([fromCoords, toCoords]);
       
       // 获取状态对应的颜色
       const statusColor = getStatusColor(status);
@@ -283,10 +478,10 @@ function Root() {
         
         for (let j = 0; j < particleCount; j++) {
           particles.push({
-            id: `${lineIndex}-${i}-${j}`,
+            id: `${cableIndex}-${i}-${j}`,
             startPoint: start,
             endPoint: end,
-            lineIndex,
+            lineIndex: cableIndex,
             segmentIndex: i,
             particleIndex: j,
             phase: (j / particleCount) * 2 * Math.PI, // 不同相位的粒子
@@ -297,12 +492,12 @@ function Root() {
     });
 
     return particles;
-  }, []);
+  }, [getDeviceCoordinates]);
 
   // Update particles based on power data
   useEffect(() => {
     if (infrastructureData && infrastructureData.hierarchical_power_cables && layerVisibility.power) {
-      const particles = generateParticles(infrastructureData.hierarchical_power_cables);
+      const particles = generateParticles(infrastructureData.hierarchical_power_cables, infrastructureData);
       setPowerParticles(particles);
     } else {
       setPowerParticles([]);
@@ -340,15 +535,20 @@ function Root() {
 
   // Generate electrical arc effects at junction points
   const getElectricalArcs = useCallback(() => {
-    if (!infrastructureData || !infrastructureData.hierarchical_power_cables || !infrastructureData.hierarchical_power_cables.features) return [];
+    if (!infrastructureData || !infrastructureData.hierarchical_power_cables) return [];
     
     const arcs = [];
     const junctionPoints = new Map();
     
     // Find junction points (where lines intersect)
-    infrastructureData.hierarchical_power_cables.features.forEach((line, lineIndex) => {
-      const coordinates = line.geometry.coordinates;
-      const status = line.properties.status;
+    infrastructureData.hierarchical_power_cables.forEach((cable, cableIndex) => {
+      const fromCoords = getDeviceCoordinates(cable.from, infrastructureData);
+      const toCoords = getDeviceCoordinates(cable.to, infrastructureData);
+      
+      if (!fromCoords || !toCoords) return;
+      
+      const coordinates = [fromCoords, toCoords];
+      const status = cable.status;
       const statusColor = getStatusColor(status);
       
       coordinates.forEach((coord, coordIndex) => {
@@ -391,7 +591,7 @@ function Root() {
     });
     
     return arcs;
-  }, [infrastructureData, animationFrame]);
+  }, [infrastructureData, animationFrame, getDeviceCoordinates]);
 
   // Function to adjust model scale based on zoom level to maintain fixed size
   const getModelScale = (baseScale) => {
@@ -558,7 +758,10 @@ function Root() {
     // Hierarchical Cable Glow Effect (outer layer)
     infrastructureData && infrastructureData.hierarchical_power_cables && new PathLayer({
       id: 'hierarchical-cable-glow',
-      data: infrastructureData.hierarchical_power_cables.features.filter(d => d.properties.status !== 'down'),
+      data: convertCablesToGeoJSON(
+        infrastructureData.hierarchical_power_cables.filter(d => d.status !== 'down'), 
+        infrastructureData
+      ).features,
       pickable: false,
       widthScale: 1,
       widthMinPixels: 15,
@@ -610,7 +813,10 @@ function Root() {
     // Hierarchical Cable Flow Animation
     infrastructureData && infrastructureData.hierarchical_power_cables && new PathLayer({
       id: 'hierarchical-cable-flow',
-      data: infrastructureData.hierarchical_power_cables.features.filter(d => d.properties.status !== 'down'),
+      data: convertCablesToGeoJSON(
+        infrastructureData.hierarchical_power_cables.filter(d => d.status !== 'down'), 
+        infrastructureData
+      ).features,
       pickable: true,
       widthScale: 1,
       widthMinPixels: 6,
@@ -665,7 +871,10 @@ function Root() {
     // Hierarchical Cable Background (static)
     infrastructureData && infrastructureData.hierarchical_power_cables && new PathLayer({
       id: 'hierarchical-cable-background',
-      data: infrastructureData.hierarchical_power_cables.features,
+      data: convertCablesToGeoJSON(
+        infrastructureData.hierarchical_power_cables, 
+        infrastructureData
+      ).features,
       pickable: true,
       widthScale: 1,
       widthMinPixels: 3,
@@ -826,8 +1035,7 @@ function Root() {
       Voltage: ${object.properties.voltage}
       Type: ${object.properties.cable_type.toUpperCase()}
       Capacity: ${object.properties.capacity}
-      Status: ${object.properties.status}
-      Current Flow: ${layerVisibility.power ? 'Active' : 'Inactive'}`;
+      Status: ${object.properties.status}`;
     }
   }
 
