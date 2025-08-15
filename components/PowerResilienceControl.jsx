@@ -316,9 +316,9 @@ const PowerResilienceCard = ({ layerVisibility, onVisibilityChange }) => {
             onMouseLeave={handlePopupMouseLeave}
             sx={{ 
               position: 'fixed', 
-              top: 70, // 设置按钮下方
-              right: 16, 
-              width: 320, 
+              top: 16, // 与设置按钮同高
+              right: 72, // 设置按钮左侧，留出按钮宽度+间距
+              width: 240, // 减小宽度以适应内容
               backgroundColor: 'rgba(255, 255, 255, 0.95)',
               backdropFilter: 'blur(10px)',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
@@ -441,7 +441,7 @@ const PowerResilienceCard = ({ layerVisibility, onVisibilityChange }) => {
                     borderRadius: 0.5,
                     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
                   }} />
-                  <Typography sx={{ flexGrow: 1, fontSize: '0.9rem' }}>Infrastructure Hierarchy</Typography>
+                  <Typography sx={{ flexGrow: 1, fontSize: '0.9rem' }}>Infrastructure</Typography>
                   <IconButton 
                     size="small" 
                     onClick={() => downloadLayerData('infrastructure')}

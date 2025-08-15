@@ -13,6 +13,9 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 //MUI Components
 import PowerResilienceCard from './components/PowerResilienceControl';
 import FloodTimelineControl from './components/FloodTimelineControl';
+import { Box, IconButton, Tooltip } from '@mui/material';
+import SatelliteIcon from '@mui/icons-material/Satellite';
+import MapIcon from '@mui/icons-material/Map';
 
 registerLoaders([OBJLoader, GLTFLoader]);
 
@@ -69,7 +72,10 @@ const INITIAL_VIEW_STATE = {
   pitch: 45
 };
 
-const MAP_STYLE = 'mapbox://styles/mapbox/streets-v12';
+const MAP_STYLES = {
+  street: 'mapbox://styles/mapbox/streets-v12',
+  satellite: 'mapbox://styles/mapbox/satellite-v9'
+};
 
 function DeckGLOverlay(props) {
   const overlay = useControl(() => new DeckOverlay({
@@ -98,6 +104,7 @@ function Root() {
     power: true,
     infrastructure: true
   });
+  const [mapStyle, setMapStyle] = useState('street');
 
   // 函数：根据当前时间点计算设备状态
   const calculateInfrastructureStatusAtTime = useCallback((currentTime, statusData) => {
@@ -640,6 +647,10 @@ function Root() {
     // 当时间步变化时，重新加载基础设施数据
   }, []);
 
+  const handleMapStyleToggle = () => {
+    setMapStyle(prev => prev === 'street' ? 'satellite' : 'street');
+  };
+
   // 当zoom状态改变时，强制重新渲染
   useEffect(() => {
     // 这个空的useEffect会在zoom状态改变时触发重新渲染
@@ -1040,18 +1051,27 @@ function Root() {
   }
 
   return (
-    <MapGL
-      initialViewState={INITIAL_VIEW_STATE}
-      mapStyle={MAP_STYLE}
-      mapboxAccessToken={MAPBOX_TOKEN}
-      minZoom={8}
-      maxZoom={17}
-      maxPitch={75}
-      onZoom={onZoom}
-    >
+    <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+      <MapGL
+        initialViewState={INITIAL_VIEW_STATE}
+        mapStyle={MAP_STYLES[mapStyle]}
+        mapboxAccessToken={MAPBOX_TOKEN}
+        minZoom={8}
+        maxZoom={17}
+        maxPitch={75}
+        onZoom={onZoom}
+      >
       <DeckGLOverlay layers={layers} getTooltip={getTooltip} />
 
-      <NavigationControl position="top-left" />
+      <NavigationControl 
+        position="top-right" 
+        style={{
+          position: 'absolute',
+          top: '120px',
+          right: '16px',
+          zIndex: 10
+        }}
+      />
       <PowerResilienceCard 
         layerVisibility={layerVisibility}
         onVisibilityChange={handleVisibilityChange}
@@ -1061,7 +1081,68 @@ function Root() {
         isVisible={layerVisibility.flood}
         availableTimesteps={floodTimestamps}
       />
-    </MapGL>
+      </MapGL>
+
+      {/* NSW Logo - Top Left */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 24,
+          left: 24,
+          zIndex: 1000,
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 1,
+          padding: 1,
+          boxShadow: 2
+        }}
+      >
+        <img 
+          src="/icons/NSW_icon.png" 
+          alt="NSW Government" 
+          style={{ height: 80, width: 'auto' }}
+        />
+      </Box>
+
+      {/* Map Style Toggle - Bottom Left */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: 30,
+          left: 30,
+          zIndex: 1000
+        }}
+      >
+        <Tooltip title={mapStyle === 'street' ? 'Switch to Satellite View' : 'Switch to Street View'} arrow>
+          <IconButton
+            onClick={handleMapStyleToggle}
+            sx={{
+              backgroundColor: 'transparent',
+              boxShadow: 0,
+              padding: 0,
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              },
+              transition: 'all 0.2s ease-in-out'
+            }}
+            size="large"
+          >
+            {mapStyle === 'street' ? (
+              <img 
+                src="/icons/satellite.svg" 
+                alt="Satellite View" 
+                style={{ width: 96, height: 96 }}
+              />
+            ) : (
+              <img 
+                src="/icons/street.svg" 
+                alt="Street View" 
+                style={{ width: 96, height: 96 }}
+              />
+            )}
+          </IconButton>
+        </Tooltip>
+      </Box>
+    </div>
   );
 }
 
