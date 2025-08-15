@@ -346,7 +346,6 @@ const PowerResilienceCard = ({ layerVisibility, onVisibilityChange }) => {
                   color: 'text.secondary',
                   lineHeight: 1.4
                 }}>
-                  Power transmission hierarchy: Plants → Substations → Transformers → Towers
                 </Typography>
                 
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
