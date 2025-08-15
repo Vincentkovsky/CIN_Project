@@ -30,4 +30,8 @@ yarn-error.log*
 Thumb.db
 
 data/flood_tiles
-data/time_series_infrastructure
+data/time_series_infrastructure# Ignore large zip files
+*.zip
+data/*.zip
+# Ignore large data directories that should be compressed
+data/flood_tiles.zip
