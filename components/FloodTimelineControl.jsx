@@ -1,7 +1,23 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Box, IconButton, Typography } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
+
+// 生成默认时间戳（向后兼容）- 移到组件外部避免重复创建
+function generateDefaultTimesteps() {
+  const baseDate = '20221008'; // 与时序数据文件名匹配
+  const result = [];
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const timeStr = `${baseDate}_${hour.toString().padStart(2, '0')}${minute.toString().padStart(2, '0')}00`;
+      result.push({
+        time: timeStr,
+        display: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+      });
+    }
+  }
+  return result;
+}
 
 const FloodTimelineControl = ({ onTimestepChange, isVisible, availableTimesteps = [] }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -10,26 +26,12 @@ const FloodTimelineControl = ({ onTimestepChange, isVisible, availableTimesteps 
   const [dynamicWidth, setDynamicWidth] = useState('calc(100vw - 400px)');
   const containerRef = useRef(null);
 
-  // 使用提供的时间戳或生成默认时间戳
-  const timesteps = availableTimesteps.length > 0 
-    ? availableTimesteps 
-    : generateDefaultTimesteps();
-
-  // 生成默认时间戳（向后兼容）
-  function generateDefaultTimesteps() {
-    const baseDate = '20221008'; // 与时序数据文件名匹配
-    const result = [];
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-        const timeStr = `${baseDate}_${hour.toString().padStart(2, '0')}${minute.toString().padStart(2, '0')}00`;
-        result.push({
-        time: timeStr,
-        display: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-      });
-    }
-    }
-    return result;
-  }
+  // 使用 useMemo 缓存时间戳数组，避免无限重新创建
+  const timesteps = useMemo(() => {
+    return availableTimesteps.length > 0 
+      ? availableTimesteps 
+      : generateDefaultTimesteps();
+  }, [availableTimesteps]);
 
   const handlePlay = useCallback(() => {
     if (isPlaying) {
@@ -64,37 +66,37 @@ const FloodTimelineControl = ({ onTimestepChange, isVisible, availableTimesteps 
     }
   }, [isPlaying, playInterval]);
 
+  // 使用 useCallback 缓存计算宽度函数
+  const calculateWidth = useCallback(() => {
+    if (!containerRef.current) return;
+    
+    // 计算内容实际需要的宽度
+    const buttonWidth = 48; // IconButton 大约宽度
+    const timeDisplayWidth = 80; // Typography minWidth
+    const gap = 16; // mr: 2 * 8px
+    const timelineDotsWidth = timesteps.length * 12 + (timesteps.length - 1) * 8; // 12px dot + 8px gap
+    const padding = 32; // padding: 2 * 16px
+    
+    const contentWidth = buttonWidth + gap + timeDisplayWidth + gap + timelineDotsWidth + padding;
+    const maxWidth = window.innerWidth - 400; // 窗口宽度 - 400px
+    
+    // 如果内容宽度小于最大宽度，使用内容宽度；否则使用最大宽度
+    if (contentWidth < maxWidth && contentWidth >= 400) {
+      setDynamicWidth(`${contentWidth}px`);
+    } else {
+      setDynamicWidth('calc(100vw - 400px)');
+    }
+  }, [timesteps.length]);
+
   // 计算动态宽度
   useEffect(() => {
-    const calculateWidth = () => {
-      if (!containerRef.current) return;
-      
-      // 计算内容实际需要的宽度
-      const buttonWidth = 48; // IconButton 大约宽度
-      const timeDisplayWidth = 80; // Typography minWidth
-      const gap = 16; // mr: 2 * 8px
-      const timelineDotsWidth = timesteps.length * 12 + (timesteps.length - 1) * 8; // 12px dot + 8px gap
-      const padding = 32; // padding: 2 * 16px
-      
-      const contentWidth = buttonWidth + gap + timeDisplayWidth + gap + timelineDotsWidth + padding;
-      const maxWidth = window.innerWidth - 400; // 窗口宽度 - 400px
-      
-      // 如果内容宽度小于最大宽度，使用内容宽度；否则使用最大宽度
-      if (contentWidth < maxWidth && contentWidth >= 400) {
-        setDynamicWidth(`${contentWidth}px`);
-      } else {
-        setDynamicWidth('calc(100vw - 400px)');
-      }
-    };
-
     calculateWidth();
     
     // 监听窗口大小变化
-    const handleResize = () => calculateWidth();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', calculateWidth);
     
-    return () => window.removeEventListener('resize', handleResize);
-  }, [timesteps.length]);
+    return () => window.removeEventListener('resize', calculateWidth);
+  }, [calculateWidth]);
 
   // 当availableTimesteps改变时，重置当前时间步
   useEffect(() => {
@@ -108,7 +110,7 @@ const FloodTimelineControl = ({ onTimestepChange, isVisible, availableTimesteps 
     if (onTimestepChange && timesteps[currentTimestep]) {
       onTimestepChange(timesteps[currentTimestep]);
     }
-  }, [currentTimestep, onTimestepChange, timesteps]);
+  }, [currentTimestep, timesteps]); // 移除 onTimestepChange 依赖，避免无限循环
 
   // Clean up interval on unmount
   useEffect(() => {

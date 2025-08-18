@@ -224,15 +224,17 @@ function Root() {
     };
   }, [getDeviceCoordinates]);
 
-  // 函数：合并基础设施数据和状态数据
+  // 函数：合并基础设施数据和状态数据 (性能优化)
   const mergeInfrastructureData = useCallback((metaData, currentTime, statusData) => {
     if (!metaData) return null;
 
     // 获取当前时间点的状态映射
     const statusMap = calculateInfrastructureStatusAtTime(currentTime, statusData);
     
-    // 深度克隆元数据
-    const mergedData = JSON.parse(JSON.stringify(metaData));
+    // 使用 structuredClone (如果支持) 或回退到 JSON 方法
+    const mergedData = typeof structuredClone !== 'undefined' 
+      ? structuredClone(metaData)
+      : JSON.parse(JSON.stringify(metaData));
 
     // 更新各层级设备的状态
     // Level 1: Power Plants
@@ -445,13 +447,14 @@ function Root() {
     }
   }, [infrastructureMetaData, infrastructureStatusData, currentTimestep, mergeInfrastructureData, calculateInfrastructureStatusAtTime]);
 
-  // Animation loop for power flow effect
+  // Animation loop for power flow effect (优化性能)
   useEffect(() => {
     const animate = () => {
       setAnimationFrame(prev => (prev + 1) % 360); // 360 frame cycle for smoother animation
     };
 
-    const interval = setInterval(animate, 30); // Update every 30ms for 33 FPS
+    // 降低帧率以提高 Windows 性能 - 从 33 FPS 降到 20 FPS
+    const interval = setInterval(animate, 50); // Update every 50ms for 20 FPS
     return () => clearInterval(interval);
   }, []);
 
@@ -478,10 +481,11 @@ function Root() {
       // 获取状态对应的颜色
       const statusColor = getStatusColor(status);
       
-      // 为每段路径创建粒子
+      // 为每段路径创建粒子 (性能优化：减少粒子数量)
       for (let i = 0; i < arcPath.length - 1; i++) {
         const [start, end] = [arcPath[i], arcPath[i + 1]];
-        const particleCount = 3; // 每段路径上的粒子数量
+        // 降低粒子数量以提高性能，特别是在 Windows 上
+        const particleCount = 2; // 从 3 减少到 2
         
         for (let j = 0; j < particleCount; j++) {
           particles.push({
